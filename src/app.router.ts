@@ -1,14 +1,13 @@
 import { Router } from "express";
-import { AppContainer } from "./app.container";
+import { Container } from "inversify";
 import { IController } from "./interfaces/controller.interface";
 
 export class AppRouter {
     private router: Router;
 
-    constructor() {
+    constructor(private container: Container) {
         this.router = Router();
-        const container = AppContainer.createContainer();
-        const controllers = container.getAll<IController>("Controller");
+        const controllers = this.container.getAll<IController>("Controller");
 
         controllers.forEach((controller) => {
             controller.registerRoutes(this.router);
@@ -19,7 +18,7 @@ export class AppRouter {
         return this.router;
     }
 
-    public static createRouter(): Router {
-        return new AppRouter().getRouter();
+    public static createRouter(container: Container): Router {
+        return new AppRouter(container).getRouter();
     }
 }
