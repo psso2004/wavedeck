@@ -1,0 +1,39 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "3000:3000"
+        environment:
+            - DB_TYPE=mysql
+            - DB_HOST=db
+            - DB_PORT=3306
+            - DB_USERNAME=pung
+            - DB_PASSWORD=pungPassword!23
+            - DB_DATABASE=wavedeck
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+        depends_on:
+            - db
+            - redis
+
+    db:
+        image: mysql:8.0
+        environment:
+            - MYSQL_ROOT_PASSWORD=rootPassword!23
+            - MYSQL_DATABASE=wavedeck
+            - MYSQL_USER=pung
+            - MYSQL_PASSWORD=pungPassword!23
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+
+    redis:
+        image: redis:7.2
+        ports:
+            - "6379:6379"
+
+volumes:
+    mysql_data:

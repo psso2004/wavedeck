@@ -3,9 +3,11 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "test": "jest",
-        "build": "tsc",
-        "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/main.ts"
+        "clean": "rimraf dist",
+        "build": "npm run clean && tsc",
+        "start:prod": "node dist/main",
+        "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/main.ts",
+        "test": "jest"
     },
     "keywords": [],
     "author": "",
@@ -19,7 +21,9 @@
         "inversify": "^7.1.0",
         "mysql2": "^3.13.0",
         "reflect-metadata": "^0.2.2",
-        "sequelize": "^6.37.6"
+        "rimraf": "^6.0.1",
+        "sequelize": "^6.37.6",
+        "sequelize-typescript": "^2.1.6"
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",
