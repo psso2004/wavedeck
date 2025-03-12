@@ -1,5 +1,6 @@
 import { ContainerModule } from "inversify";
 import { IController } from "../../interfaces/controller.interface";
+import { IOC_TYPE } from "../../types/ioc.type";
 import { UserController } from "./user.controller";
 import { UserService } from "./user.service";
 
@@ -7,8 +8,8 @@ import { UserService } from "./user.service";
 export class UserModule extends ContainerModule {
     constructor() {
         super(({ bind }) => {
-            bind<IController>("Controller").to(UserController);
-            bind<UserService>("UserService").to(UserService);
+            bind<IController>(IOC_TYPE.Controller).to(UserController);
+            bind<UserService>(IOC_TYPE.UserService).to(UserService);
         });
     }
 }

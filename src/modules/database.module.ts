@@ -1,5 +1,6 @@
 import { ContainerModule } from "inversify";
 import { Sequelize } from "sequelize-typescript";
+import { IOC_TYPE } from "../types/ioc.type";
 
 export class DatabaseModule extends ContainerModule {
     constructor() {
@@ -16,7 +17,7 @@ export class DatabaseModule extends ContainerModule {
                 models: [__dirname + "/**/*.model.{ts,js}"],
             });
 
-            bind<Sequelize>("Sequelize").toConstantValue(sequelize);
+            bind<Sequelize>(IOC_TYPE.Sequelize).toConstantValue(sequelize);
         });
     }
 }

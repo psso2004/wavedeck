@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import { inject, injectable } from "inversify";
 import { IController } from "../../interfaces/controller.interface";
+import { IOC_TYPE } from "../../types/ioc.type";
 import { UserService } from "./user.service";
 
 // todo: test 컨트롤러
@@ -8,7 +9,7 @@ import { UserService } from "./user.service";
 export class UserController implements IController {
     private userService: UserService;
 
-    constructor(@inject("UserService") userService: UserService) {
+    constructor(@inject(IOC_TYPE.UserService) userService: UserService) {
         this.userService = userService;
     }
 

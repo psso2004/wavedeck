@@ -5,6 +5,7 @@ import express from "express";
 import { Sequelize } from "sequelize-typescript";
 import { AppContainer } from "./app.container";
 import { AppRouter } from "./app.router";
+import { IOC_TYPE } from "./types/ioc.type";
 
 async function bootstrap() {
     dotenv.config();
@@ -17,7 +18,7 @@ async function bootstrap() {
     app.use(bodyParser.json());
     app.use(AppRouter.createRouter(container));
 
-    const sequelize = container.get<Sequelize>("Sequelize");
+    const sequelize = container.get<Sequelize>(IOC_TYPE.Sequelize);
     try {
         await sequelize.authenticate();
         app.listen(port, () => {
