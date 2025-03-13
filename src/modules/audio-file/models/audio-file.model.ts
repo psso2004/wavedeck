@@ -36,9 +36,9 @@ export default class AudioFile extends Model<AudioFile> {
 
     @Column({
         type: DataType.STRING,
-        allowNull: true,
+        allowNull: false,
     })
-    filePath!: string | null;
+    filePath!: string;
 
     @Column({
         type: DataType.INTEGER,
@@ -54,9 +54,9 @@ export default class AudioFile extends Model<AudioFile> {
 
     @Column({
         type: DataType.STRING,
-        allowNull: true,
+        allowNull: false,
     })
-    previewUrl!: string | null;
+    previewUrl!: string;
 
     @Column({
         type: DataType.DATE,

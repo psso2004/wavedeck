@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+    title: wavedeck api
+    version: "1.0.0"
+    description:
+servers:
+    - url: http://localhost:3000
+paths:
+    /users:
+        get:
+            summary:
+            description:
+            tags:
+                - Users
+            responses:
+                "200":
+                    description:
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/User"
+    /upload/audio:
+        post:
+            summary:
+            description:
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            properties:
+                                userId:
+                                    type: integer
+                                    description:
+                                fileName:
+                                    type: string
+                                    description:
+                                file:
+                                    type: string
+                                    format: binary
+                                    description:
+            responses:
+                "200":
+                    description:
+components:
+    schemas:
+        User:
+            type: object
+            required:
+                - id
+                - name
+            properties:
+                id:
+                    type: integer
+                    description:
+                name:
+                    type: string
+                    description:
