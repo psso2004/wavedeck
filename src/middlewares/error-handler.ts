@@ -1,5 +1,7 @@
 // src/middleware/ErrorHandler.ts
 import { NextFunction, Request, Response } from "express";
+import fs from "fs/promises";
+import multer from "multer";
 import { DatabaseError } from "sequelize";
 
 export class ErrorHandler {
@@ -13,10 +15,22 @@ export class ErrorHandler {
             return next(err);
         }
 
+        if (req.file) {
+            fs.unlink(req.file.path);
+        }
+
         if (err && err.error && err.error.isJoi) {
             res.status(400).json({
                 message: "Validation error",
                 details: err.error.details,
+            });
+            return next(err);
+        }
+
+        if (err instanceof multer.MulterError) {
+            res.status(400).json({
+                message: "File upload error",
+                error: err.message,
             });
             return next(err);
         }
@@ -33,6 +47,7 @@ export class ErrorHandler {
                 message: "Database error",
                 error: err.message,
             });
+            return next(err);
         }
 
         console.error("Unhandled error:", err);

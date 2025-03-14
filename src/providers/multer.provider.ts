@@ -34,6 +34,9 @@ export class MulterProvider {
                 if (allowedTypes.includes(file.mimetype)) {
                     next(null, true);
                 } else {
+                    if (file.path) {
+                        fs.unlink(file.path, (err) => console.error(err));
+                    }
                     next(createHttpError.BadRequest("invalid file type"));
                 }
             },

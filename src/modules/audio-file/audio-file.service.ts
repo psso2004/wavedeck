@@ -12,15 +12,26 @@ export class AudioFileService {
         @inject(IOC_TYPE.Sequelize) private readonly sequelize: Sequelize
     ) {}
 
-    public createAudioFile(
+    public async createAudioFile(
         createData: Partial<CreationAttributes<AudioFile>>,
         transaction: Transaction | null = null
     ): Promise<AudioFile> {
-        const repo = this.sequelize.getRepository(AudioFile);
-        const audioFile = repo.build(
-            createData as CreationAttributes<AudioFile>
-        );
-        return audioFile.save({ transaction });
+        try {
+            const repo = this.sequelize.getRepository(AudioFile);
+            const audioFile = repo.build(
+                createData as CreationAttributes<AudioFile>
+            );
+
+            return audioFile.save({ transaction });
+        } catch (err) {
+            console.error(err);
+
+            if (createData.filePath) {
+                await this.deleteFile(createData.filePath);
+            }
+
+            throw err;
+        }
     }
 
     public getAudioFile(
@@ -58,7 +69,7 @@ export class AudioFileService {
         try {
             await repo.destroy({ where: { id }, transaction: useTrasaction });
 
-            await fs.unlink(audioFile.filePath);
+            await this.deleteFile(audioFile.filePath);
 
             if (isTransactionOwner) {
                 await useTrasaction.commit();
@@ -69,6 +80,14 @@ export class AudioFileService {
             }
 
             throw createHttpError.InternalServerError("failed to delete file");
+        }
+    }
+
+    private async deleteFile(filePath: string): Promise<void> {
+        try {
+            await fs.unlink(filePath);
+        } catch (err) {
+            console.error(err);
         }
     }
 }
