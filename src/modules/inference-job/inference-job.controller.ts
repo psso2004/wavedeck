@@ -1,17 +1,24 @@
 import { Request, Response, Router } from "express";
+import createHttpError from "http-errors";
 import { inject, injectable } from "inversify";
 import { IController } from "../../interfaces/controller.interface";
 import { JoiValidatorProvider } from "../../providers/validator.provider";
 import { IOC_TYPE } from "../../types/ioc.type";
+import { AudioFileService } from "../audio-file/audio-file.service";
 import { CreateInferenceJobInputDto } from "./dtos/inputs/create-inference-job.input.dto";
 import { InferenceJobOutputDto } from "./dtos/outputs/inference-job.output.dto";
 import { GetInferenceJobQueryDto } from "./dtos/queries/get-inference-job.query.dto";
+import { InferenceJobService } from "./inference-job.service";
 
 @injectable()
 export class InferenceJobController implements IController {
     constructor(
         @inject(IOC_TYPE.JoiValidator)
-        private readonly joiValidator: JoiValidatorProvider
+        private readonly joiValidator: JoiValidatorProvider,
+        @inject(IOC_TYPE.InferenceJobService)
+        private readonly inferenceJobService: InferenceJobService,
+        @inject(IOC_TYPE.AudioFileService)
+        private readonly audioFileService: AudioFileService
     ) {}
 
     public registerRoutes(router: Router): void {
@@ -35,7 +42,29 @@ export class InferenceJobController implements IController {
         res: Response
     ): Promise<InferenceJobOutputDto> {
         const dto = CreateInferenceJobInputDto.create(req.body);
-        const output: InferenceJobOutputDto = {} as InferenceJobOutputDto;
+
+        const audioFile = await this.audioFileService.getAudioFile({
+            where: {
+                id: dto.audioFileId,
+                userId: dto.userId,
+            },
+        });
+
+        const inferenceJob = await this.inferenceJobService.createInferenceJob({
+            voiceId: dto.voiceId,
+            pitch: dto.pitch,
+            originalPath: audioFile?.filePath,
+        });
+
+        const reloadInferenceJob =
+            await this.inferenceJobService.getInferenceJob({
+                where: {
+                    id: inferenceJob.id,
+                },
+            });
+        if (!reloadInferenceJob) throw new Error("not found inferenceJob");
+        const output: InferenceJobOutputDto =
+            InferenceJobOutputDto.fromModel(reloadInferenceJob);
 
         res.json(output);
         return output;
@@ -46,7 +75,17 @@ export class InferenceJobController implements IController {
         res: Response
     ): Promise<InferenceJobOutputDto> {
         const dto = GetInferenceJobQueryDto.create(req.query);
-        const output: InferenceJobOutputDto = {} as InferenceJobOutputDto;
+
+        const { inferenceJobId } = dto;
+        const inferenceJob = await this.inferenceJobService.getInferenceJobById(
+            inferenceJobId
+        );
+        if (!inferenceJob) {
+            throw createHttpError.NotFound("not found inferenceJob");
+        }
+
+        const output: InferenceJobOutputDto =
+            InferenceJobOutputDto.fromModel(inferenceJob);
 
         res.json(output);
         return output;
