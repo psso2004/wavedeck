@@ -1,7 +1,13 @@
-import { Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { Container } from "inversify";
 import { IController } from "./interfaces/controller.interface";
 import { IOC_TYPE } from "./types/ioc.type";
+
+export const asyncMiddleware =
+    (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
+    (req: Request, res: Response, next: NextFunction) => {
+        Promise.resolve(fn(req, res, next)).catch(next);
+    };
 
 export class AppRouter {
     private router: Router;
@@ -14,6 +20,14 @@ export class AppRouter {
 
         controllers.forEach((controller) => {
             controller.registerRoutes(this.router);
+        });
+
+        this.router.stack.forEach(({ route }) => {
+            route?.stack.forEach((layer: any) => {
+                if (typeof layer.handle === "function") {
+                    layer.handle = asyncMiddleware(layer.handle);
+                }
+            });
         });
     }
 

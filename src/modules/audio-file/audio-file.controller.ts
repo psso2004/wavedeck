@@ -1,9 +1,11 @@
 import { Request, Response, Router } from "express";
+import createHttpError from "http-errors";
 import { inject, injectable } from "inversify";
 import { IController } from "../../interfaces/controller.interface";
 import { MulterProvider } from "../../providers/multer.provider";
 import { JoiValidatorProvider } from "../../providers/validator.provider";
 import { IOC_TYPE } from "../../types/ioc.type";
+import { AudioFileService } from "./audio-file.service";
 import { CreateAudioFileInputDto } from "./dtos/inputs/create-audio-file.input.dto";
 import { DeleteAudioFileInputDto } from "./dtos/inputs/delete-audio-file.input.dto";
 import { AudioFileOutputDto } from "./dtos/outputs/audio-file.output.dto";
@@ -15,7 +17,9 @@ export class AudioFileController implements IController {
         @inject(IOC_TYPE.JoiValidator)
         private readonly joiValidator: JoiValidatorProvider,
         @inject(IOC_TYPE.MulterProvider)
-        private readonly multer: MulterProvider
+        private readonly multer: MulterProvider,
+        @inject(IOC_TYPE.AudioFileService)
+        private readonly audioFileService: AudioFileService
     ) {}
 
     public registerRoutes(router: Router): void {
@@ -44,7 +48,16 @@ export class AudioFileController implements IController {
         res: Response
     ): Promise<AudioFileOutputDto> {
         const dto = CreateAudioFileInputDto.create(req.body);
-        const output: AudioFileOutputDto = {} as AudioFileOutputDto;
+        const audioFile = await this.audioFileService.createAudioFile(
+            Object.assign(dto, {
+                filePath: dto.file.path,
+                previewUrl: `${req.protocol}://${req.get("host")}/uploads/${
+                    dto.file.filename
+                }`,
+            })
+        );
+        const output: AudioFileOutputDto =
+            AudioFileOutputDto.fromModel(audioFile);
 
         res.json(output);
         return output;
@@ -52,7 +65,10 @@ export class AudioFileController implements IController {
 
     private async deleteAudioFile(req: Request, res: Response): Promise<void> {
         const dto = DeleteAudioFileInputDto.create(req.body);
-        res.json({});
+        await this.audioFileService.deleteAudioFile({
+            id: dto.audioFileId,
+            userId: dto.userId,
+        });
     }
 
     private async getAudioFile(
@@ -60,7 +76,19 @@ export class AudioFileController implements IController {
         res: Response
     ): Promise<AudioFileOutputDto> {
         const dto = GetAudioFileQueryDto.create(req.query);
-        const output: AudioFileOutputDto = {} as AudioFileOutputDto;
+        const audioFile = await this.audioFileService.getAudioFile({
+            where: {
+                id: dto.audioFileId,
+                userId: dto.userId,
+            },
+        });
+
+        if (audioFile === null) {
+            throw createHttpError.NotFound("not found audiofile");
+        }
+
+        const output: AudioFileOutputDto =
+            AudioFileOutputDto.fromModel(audioFile);
 
         res.json(output);
         return output;

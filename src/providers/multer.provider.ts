@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import fs from "fs";
+import createHttpError from "http-errors";
 import { injectable } from "inversify";
 import multer, { Multer, StorageEngine } from "multer";
 import path from "path";
@@ -33,7 +34,7 @@ export class MulterProvider {
                 if (allowedTypes.includes(file.mimetype)) {
                     next(null, true);
                 } else {
-                    next(new Error("invalid file type"));
+                    next(createHttpError.BadRequest("invalid file type"));
                 }
             },
             limits: {

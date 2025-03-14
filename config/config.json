@@ -1,0 +1,23 @@
+{
+    "development": {
+        "username": "pung",
+        "password": "pungPassword!23",
+        "database": "wavedeck",
+        "host": "127.0.0.1",
+        "dialect": "mysql"
+    },
+    "test": {
+        "username": "pung",
+        "password": "pungPassword!23",
+        "database": "wavedeck",
+        "host": "127.0.0.1",
+        "dialect": "mysql"
+    },
+    "production": {
+        "username": "pung",
+        "password": "pungPassword!23",
+        "database": "wavedeck",
+        "host": "127.0.0.1",
+        "dialect": "mysql"
+    }
+}

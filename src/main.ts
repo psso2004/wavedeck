@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import express from "express";
 import fs from "fs";
 import yaml from "js-yaml";
+import path from "path";
 import { Sequelize } from "sequelize-typescript";
 import swaggerUi, { JsonObject } from "swagger-ui-express";
 import { AppContainer } from "./app.container";
@@ -12,6 +13,13 @@ import { ErrorHandler } from "./middlewares/error-handler";
 import { IOC_TYPE } from "./types/ioc.type";
 
 async function bootstrap() {
+    process.on("unhandledRejection", (reason, promise) => {
+        console.error(promise, reason);
+    });
+    process.on("uncaughtException", (err) => {
+        console.error(err);
+    });
+
     dotenv.config();
 
     const container = AppContainer.createContainer();
@@ -21,6 +29,8 @@ async function bootstrap() {
     app.use(cors());
     app.use(bodyParser.json());
     app.use(AppRouter.createRouter(container));
+
+    app.use("/uploads", express.static(path.join(__dirname, "/../uploads")));
 
     app.use(ErrorHandler.handleErrors);
 
