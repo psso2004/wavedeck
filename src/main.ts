@@ -28,6 +28,7 @@ async function bootstrap() {
 
     app.use(cors());
     app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
     app.use(AppRouter.createRouter(container));
 
     app.use("/uploads", express.static(path.join(__dirname, "/../uploads")));

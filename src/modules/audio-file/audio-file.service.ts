@@ -1,3 +1,4 @@
+import fs from "fs/promises";
 import createHttpError from "http-errors";
 import { inject, injectable } from "inversify";
 import { CreationAttributes, FindOptions, Transaction } from "sequelize";
@@ -30,20 +31,44 @@ export class AudioFileService {
     }
 
     public async deleteAudioFile(
-        data: Pick<AudioFile, "id" | "userId">
+        data: Pick<AudioFile, "id" | "userId">,
+        transaction: Transaction | null = null
     ): Promise<void> {
         const { id, userId } = data;
         const repo = this.sequelize.getRepository(AudioFile);
 
-        const audioFile = await repo.findByPk(id);
+        const audioFile = await repo.findByPk(id, {
+            transaction,
+        });
         if (audioFile === null) {
             throw new createHttpError.NotFound("not found audiofile");
         }
-
         if (audioFile.userId !== userId) {
             throw new createHttpError.Unauthorized("belongs to another user");
         }
 
-        await repo.destroy({ where: { id } });
+        const useTrasaction =
+            transaction ?? (await this.sequelize.transaction());
+
+        let isTransactionOwner = false;
+        if (!transaction) {
+            isTransactionOwner = true;
+        }
+
+        try {
+            await repo.destroy({ where: { id }, transaction: useTrasaction });
+
+            await fs.unlink(audioFile.filePath);
+
+            if (isTransactionOwner) {
+                await useTrasaction.commit();
+            }
+        } catch (err) {
+            if (isTransactionOwner) {
+                await useTrasaction.rollback();
+            }
+
+            throw createHttpError.InternalServerError("failed to delete file");
+        }
     }
 }

@@ -30,8 +30,8 @@ export class AudioFileController implements IController {
             (req, res) => this.createAudioFile(req, res)
         );
 
-        router.delete(
-            "/upload/audio",
+        router.post(
+            "/upload/audio/delete",
             this.joiValidator.getValidatorBody(DeleteAudioFileInputDto.schema),
             (req, res) => this.deleteAudioFile(req, res)
         );
@@ -69,6 +69,7 @@ export class AudioFileController implements IController {
             id: dto.audioFileId,
             userId: dto.userId,
         });
+        res.status(204).send();
     }
 
     private async getAudioFile(
