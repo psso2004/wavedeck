@@ -10,14 +10,14 @@ export class MulterProvider {
 
     constructor() {
         const storage: StorageEngine = multer.diskStorage({
-            destination: (_req, _file, cb) => {
+            destination: (_req, _file, next) => {
                 const uploadPath = path.join(__dirname, "/../../uploads");
 
                 fs.mkdirSync(uploadPath, { recursive: true });
-                cb(null, uploadPath);
+                next(null, uploadPath);
             },
-            filename: (_req, file, cb) => {
-                cb(
+            filename: (_req, file, next) => {
+                next(
                     null,
                     `${Date.now()}-${Math.round(Math.random() * 1000000000)}-${
                         file.originalname
@@ -26,7 +26,20 @@ export class MulterProvider {
             },
         });
 
-        this.upload = multer({ storage });
+        this.upload = multer({
+            storage,
+            fileFilter: (req, file, next) => {
+                const allowedTypes = ["audio/mpeg", "audio/wav", "audio/mp3"];
+                if (allowedTypes.includes(file.mimetype)) {
+                    next(null, true);
+                } else {
+                    next(new Error("invalid file type"));
+                }
+            },
+            limits: {
+                fileSize: 10 * 1024 * 1024,
+            },
+        });
     }
 
     public single(fieldName: string) {
