@@ -1,30 +1,18 @@
 openapi: 3.0.0
 info:
-    title: wavedeck api
-    version: "1.0.0"
-    description:
+    title: 음성 파일 업로드 및 변환  API
+    description: "오디오 파일을 업로드하고, 삭제하며, 변환 작업을 수행할 수 있는 API입니다."
+    version: 1.0.0
+
 servers:
     - url: http://localhost:3000
+      description: 로컬 개발 서버
+
 paths:
-    /users:
-        get:
-            summary:
-            description:
-            tags:
-                - Users
-            responses:
-                "200":
-                    description:
-                    content:
-                        application/json:
-                            schema:
-                                type: array
-                                items:
-                                    $ref: "#/components/schemas/User"
     /upload/audio:
         post:
-            summary:
-            description:
+            summary: "오디오 파일 업로드"
+            description: "사용자가 오디오 파일을 업로드합니다."
             requestBody:
                 required: true
                 content:
@@ -34,28 +22,171 @@ paths:
                             properties:
                                 userId:
                                     type: integer
-                                    description:
-                                fileName:
-                                    type: string
-                                    description:
+                                    description: "사용자 ID"
                                 file:
                                     type: string
                                     format: binary
-                                    description:
+                                    description: "업로드할 오디오 파일"
+                                fileName:
+                                    type: string
+                                    description: "파일명"
+                                fileSize:
+                                    type: integer
+                                    description: "파일 크기"
+                                duration:
+                                    type: integer
+                                    description: "오디오 길이"
             responses:
                 "200":
-                    description:
+                    description: "파일 업로드 성공"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AudioFileOutput"
+                "404":
+                    description: "사용자를 찾을 수 없음"
+
+        get:
+            summary: "오디오 파일 조회"
+            description: "특정 오디오 파일의 정보를 조회합니다."
+            parameters:
+                - in: query
+                  name: userId
+                  schema:
+                      type: integer
+                  required: true
+                  description: "사용자 ID"
+                - in: query
+                  name: audioFileId
+                  schema:
+                      type: integer
+                  required: true
+                  description: "오디오 파일 ID"
+            responses:
+                "200":
+                    description: "오디오 파일 정보 반환"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AudioFileOutput"
+                "404":
+                    description: "오디오 파일을 찾을 수 없음"
+
+    /upload/audio/delete:
+        post:
+            summary: "오디오 파일 삭제"
+            description: "사용자가 업로드한 오디오 파일을 삭제합니다."
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/DeleteAudioFileInput"
+            responses:
+                "204":
+                    description: "오디오 파일 삭제 성공"
+                "404":
+                    description: "오디오 파일을 찾을 수 없음"
+
+    /inference/sts:
+        post:
+            summary: "AI 변환 요청"
+            description: "업로드된 오디오 파일을 기반으로 변환요청 작업을 생성합니다."
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreateInferenceJobInput"
+            responses:
+                "200":
+                    description: "변환 요청 작업 생성 성공"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InferenceJobOutput"
+                "404":
+                    description: "오디오 파일을 찾을 수 없음"
+
+        get:
+            summary: "변환 요청 작업 조회"
+            description: "진행 중인 또는 완료된 변환 작업 정보를 조회합니다."
+            parameters:
+                - in: query
+                  name: inferenceJobId
+                  schema:
+                      type: integer
+                  required: true
+                  description: "변환 작업 ID"
+            responses:
+                "200":
+                    description: "변환 작업 정보 반환"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InferenceJobOutput"
+                "404":
+                    description: "추론 작업을 찾을 수 없음"
+
 components:
     schemas:
-        User:
+        AudioFileOutput:
             type: object
-            required:
-                - id
-                - name
             properties:
-                id:
+                audioFileId:
                     type: integer
-                    description:
-                name:
+                    description: "오디오 파일 ID"
+                previewUrl:
                     type: string
-                    description:
+                    description: "파일 미리보기 URL"
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: "파일 업로드 시간"
+
+        DeleteAudioFileInput:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    description: "사용자 ID"
+                audioFileId:
+                    type: integer
+                    description: "삭제할 오디오 파일 ID"
+
+        CreateInferenceJobInput:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    description: "사용자 ID"
+                audioFileId:
+                    type: integer
+                    description: "오디오 파일 ID"
+                voiceId:
+                    type: integer
+                    description: "음성 변환 ID"
+                pitch:
+                    type: integer
+                    description: "음높이 조정 값"
+                soundQuality:
+                    type: integer
+                    description: "음질 설정 값"
+
+        InferenceJobOutput:
+            type: object
+            properties:
+                inferenceJobId:
+                    type: integer
+                    description: "변환 작업 ID"
+                previewUrl:
+                    type: string
+                    description: "결과 미리보기 URL"
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: "변환 작업 생성 시간"
+                status:
+                    type: string
+                    enum: ["processing", "completed"]
+                    description: "변환 작업 상태"
