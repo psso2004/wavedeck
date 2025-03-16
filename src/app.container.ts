@@ -1,4 +1,5 @@
 import { Container } from "inversify";
+import { AIConverterModule } from "./modules/ai-converter/ai-converter.module";
 import { AudioFileModule } from "./modules/audio-file/audio-file.module";
 import { DatabaseModule } from "./modules/database.module";
 import { InferenceJobModule } from "./modules/inference-job/inference-job.module";
@@ -13,12 +14,19 @@ export class AppContainer {
             new DatabaseModule(),
             new UserModule(),
             new AudioFileModule(),
-            new InferenceJobModule()
+            new InferenceJobModule(),
+            new AIConverterModule()
         );
         container
             .bind<JoiValidatorProvider>(IOC_TYPE.JoiValidator)
             .to(JoiValidatorProvider)
             .inSingletonScope();
+
+        Object.values(IOC_TYPE).forEach((type) => {
+            if (Symbol.keyFor(type)?.includes("Consumer")) {
+                container.get(type);
+            }
+        });
 
         return container;
     }

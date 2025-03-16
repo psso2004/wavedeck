@@ -6,5 +6,8 @@ export const IOC_TYPE = {
     UserService: Symbol.for("UserService"),
     AudioFileService: Symbol.for("AudioFileService"),
     InferenceJobService: Symbol.for("InferenceJobService"),
+    InferenceJobConsumer: Symbol.for("InferenceJobConsumer"),
+    InferenceJobQueue: Symbol.for("InferenceJobQueue"),
     RequestLogService: Symbol.for("RequestLogService"),
+    AIConverterService: Symbol.for("AIConverterService"),
 };

@@ -49,22 +49,22 @@ export class InferenceJobController implements IController {
                 userId: dto.userId,
             },
         });
+        if (!audioFile) throw createHttpError.NotFound("not found audiofile");
 
         const inferenceJob = await this.inferenceJobService.createInferenceJob({
             voiceId: dto.voiceId,
             pitch: dto.pitch,
             originalPath: audioFile?.filePath,
+            audioFileInferenceJobs: [
+                {
+                    audioFileId: audioFile.id,
+                } as any,
+            ],
         });
+        await this.inferenceJobService.addJobQueue(inferenceJob);
 
-        const reloadInferenceJob =
-            await this.inferenceJobService.getInferenceJob({
-                where: {
-                    id: inferenceJob.id,
-                },
-            });
-        if (!reloadInferenceJob) throw new Error("not found inferenceJob");
         const output: InferenceJobOutputDto =
-            InferenceJobOutputDto.fromModel(reloadInferenceJob);
+            InferenceJobOutputDto.fromModel(inferenceJob);
 
         res.json(output);
         return output;
