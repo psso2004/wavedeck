@@ -66,7 +66,7 @@ export default class InferenceJob extends Model<InferenceJob> {
         type: DataType.INTEGER,
         allowNull: true,
     })
-    queue_position!: number | null;
+    queueId!: number | null;
 
     @Column({
         type: DataType.DATE,

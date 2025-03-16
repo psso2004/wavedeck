@@ -39,7 +39,7 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: true,
             },
-            queue_position: {
+            queue_id: {
                 type: Sequelize.INTEGER,
                 allowNull: true,
             },

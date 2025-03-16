@@ -61,7 +61,7 @@ export class InferenceJobService {
     public async addJobQueue(data: InferenceJob): Promise<void> {
         const job = await this.inferenceJobQueue.add("inferenceJob", data);
         await this.updateInferenceJob(data.id, {
-            queue_position: Number(job.id),
+            queueId: Number(job.id),
         });
     }
 }
