@@ -25,6 +25,10 @@ export class RequestLogService {
     }
 
     public async logRequest(req: Request, res: Response, next: NextFunction) {
+        if (req.originalUrl.startsWith("/docs")) {
+            return next();
+        }
+
         const requestId = uuidv4();
 
         res.on("finish", async () => {
