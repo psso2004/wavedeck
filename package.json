@@ -32,7 +32,8 @@
         "rimraf": "^6.0.1",
         "sequelize": "^6.37.6",
         "sequelize-typescript": "^2.1.6",
-        "swagger-ui-express": "^5.0.1"
+        "swagger-ui-express": "^5.0.1",
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",
