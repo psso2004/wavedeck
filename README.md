@@ -13,13 +13,13 @@ docker-compose up -d
 2. DB 스키마 생성 스크립트 실행
 
 ```bash
-npm run migration:run
+npm run db:migrate
 ```
 
 3. DB 시드 데이터 추가
 
 ```bash
-npm run migration:seed
+npm run db:seed
 ```
 
 ---
