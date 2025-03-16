@@ -13,4 +13,9 @@ export class UserService {
         const repo = this.sequelize.getRepository(User);
         return repo.findByPk(id);
     }
+
+    public getUsers(): Promise<User[]> {
+        const repo = this.sequelize.getRepository(User);
+        return repo.findAll();
+    }
 }
