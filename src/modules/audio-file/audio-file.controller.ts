@@ -5,6 +5,7 @@ import { IController } from "../../interfaces/controller.interface";
 import { MulterProvider } from "../../providers/multer.provider";
 import { JoiValidatorProvider } from "../../providers/validator.provider";
 import { IOC_TYPE } from "../../types/ioc.type";
+import { UserService } from "../user/user.service";
 import { AudioFileService } from "./audio-file.service";
 import { CreateAudioFileInputDto } from "./dtos/inputs/create-audio-file.input.dto";
 import { DeleteAudioFileInputDto } from "./dtos/inputs/delete-audio-file.input.dto";
@@ -19,7 +20,9 @@ export class AudioFileController implements IController {
         @inject(IOC_TYPE.MulterProvider)
         private readonly multer: MulterProvider,
         @inject(IOC_TYPE.AudioFileService)
-        private readonly audioFileService: AudioFileService
+        private readonly audioFileService: AudioFileService,
+        @inject(IOC_TYPE.UserService)
+        private readonly userService: UserService
     ) {}
 
     public registerRoutes(router: Router): void {
@@ -48,6 +51,12 @@ export class AudioFileController implements IController {
         res: Response
     ): Promise<AudioFileOutputDto> {
         const dto = CreateAudioFileInputDto.create(req.body);
+
+        const user = await this.userService.getUserById(dto.userId);
+        if (!user) {
+            throw createHttpError.NotFound("not found user");
+        }
+
         const audioFile = await this.audioFileService.createAudioFile(
             Object.assign(dto, {
                 filePath: dto.file.path,

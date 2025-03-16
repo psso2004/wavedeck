@@ -1,9 +1,16 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
+import { Sequelize } from "sequelize-typescript";
+import { IOC_TYPE } from "../../types/ioc.type";
+import User from "./models/user.model";
 
-// todo: test service
 @injectable()
 export class UserService {
-    public getUser() {
-        return [{ id: 1, name: "test" }];
+    constructor(
+        @inject(IOC_TYPE.Sequelize) private readonly sequelize: Sequelize
+    ) {}
+
+    public getUserById(id: number): Promise<User | null> {
+        const repo = this.sequelize.getRepository(User);
+        return repo.findByPk(id);
     }
 }
